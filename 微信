@@ -597,14 +597,9 @@
                     <p style="color: #2d3436; font-size: 14px; margin-bottom: 20px;">
                         ⏰ 限时优惠价!原价29.9元
                     </p>
-
-                    <div class="qrcode-container">
-                        <div class="qrcode-placeholder">
-                            这里放你的收款二维码<br>
-                            (微信/支付宝)<br><br>
-                            使用时替换为:<br>
-                            &lt;img src="qrcode.jpg" width="220"&gt;
-                        </div>
+<img src="wechat_qrcode.jpg" width="200" alt="微信收款码">
+    <br>
+    <img src="alipay_qrcode.png" width="200" alt="支付宝收款码">
                     </div>
 
                     <div class="upload-section">
