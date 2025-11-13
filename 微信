@@ -597,10 +597,16 @@
                     <p style="color: #2d3436; font-size: 14px; margin-bottom: 20px;">
                         ⏰ 限时优惠价!原价29.9元
                     </p>
-<img src="wechat_qrcode.jpg" width="200" alt="微信收款码">
-    <br>
-    <img src="alipay_qrcode.png" width="200" alt="支付宝收款码">
-                    </div>
+<div style="text-align: center;">
+    <div style="display: inline-block; margin: 0 10px;">
+        <img src="wechat_qrcode.jpg" width="180" alt="微信收款码" style="border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <p style="margin-top: 10px; color: #666; font-size: 14px;">微信支付</p>
+    </div>
+    <div style="display: inline-block; margin: 0 10px;">
+        <img src="alipay_qrcode.png" width="180" alt="支付宝收款码" style="border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <p style="margin-top: 10px; color: #666; font-size: 14px;">支付宝</p>
+    </div>
+</div>
 
                     <div class="upload-section">
                         <label for="paymentProof" class="upload-label">
@@ -737,31 +743,48 @@
         let testResult = null;
 
         // 验证卡密
-        function verifyCard() {
-            const cardCode = document.getElementById('cardCode').value.trim().toUpperCase();
-            const errorDiv = document.getElementById('errorMessage');
+       function verifyCard() {
+    const cardCode = document.getElementById('cardCode').value.trim().toUpperCase();
+    const errorDiv = document.getElementById('errorMessage');
 
-            if (!cardCode) {
-                errorDiv.textContent = '请输入卡密';
-                errorDiv.style.display = 'block';
-                return;
-            }
+    if (!cardCode) {
+        errorDiv.textContent = '请输入卡密';
+        errorDiv.style.display = 'block';
+        return;
+    }
 
-            // 从localStorage获取卡密列表
-            const cards = JSON.parse(localStorage.getItem('talentCards') || '[]');
-            const card = cards.find(c => c.code === cardCode);
+    // 从localStorage获取卡密列表，如果不存在则创建空数组
+    let cards = JSON.parse(localStorage.getItem('talentCards') || '[]');
+    
+    // 如果找不到卡密，可能是在不同设备，先检查格式是否正确
+    const cardFormat = /^TF-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+    if (!cardFormat.test(cardCode)) {
+        errorDiv.textContent = '卡密格式不正确';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    let card = cards.find(c => c.code === cardCode);
 
-            if (!card) {
-                errorDiv.textContent = '卡密不存在';
-                errorDiv.style.display = 'block';
-                return;
-            }
+    // 如果卡密不存在于localStorage中，说明是在不同设备
+    // 我们允许使用，但需要先添加到当前设备的localStorage
+    if (!card) {
+        // 添加这个卡密到当前设备
+        card = {
+            code: cardCode,
+            used: false,
+            createdAt: new Date().toISOString(),
+            device: 'cross-device'
+        };
+        cards.push(card);
+        localStorage.setItem('talentCards', JSON.stringify(cards));
+    }
 
-            if (card.used) {
-                errorDiv.textContent = '该卡密已被使用';
-                errorDiv.style.display = 'block';
-                return;
-            }
+    if (card.used) {
+        errorDiv.textContent = '该卡密已被使用';
+        errorDiv.style.display = 'block';
+        return;
+    }
 
             // 验证成功,保存当前卡密
             currentCard = cardCode;
@@ -899,17 +922,24 @@
             const dimensionCounts = {};
 
             questions.forEach(q => {
-                const answer = answers[q.id];
-                if (answer !== undefined) {
-                    if (!scores[q.dimension]) {
-                        scores[q.dimension] = 0;
-                        dimensionCounts[q.dimension] = 0;
-                    }
-                    scores[q.dimension] += (answer + 1) * 4;
-                    dimensionCounts[q.dimension]++;
-                }
-            });
+    const answer = answers[q.id];
+    if (answer !== undefined) {
+        if (!scores[q.dimension]) {
+            scores[q.dimension] = 0;
+            dimensionCounts[q.dimension] = 0;
+        }
+        // 改为1-5分，乘以4变成4-20分
+        scores[q.dimension] += (answer + 1);
+        dimensionCounts[q.dimension]++;
+    }
+});
 
+// 计算平均分
+Object.keys(scores).forEach(dim => {
+    if (dimensionCounts[dim] > 0) {
+        scores[dim] = Math.round(scores[dim] / dimensionCounts[dim] * 4);
+    }
+});
             // 标记卡密已使用
             const cards = JSON.parse(localStorage.getItem('talentCards') || '[]');
             const cardIndex = cards.findIndex(c => c.code === currentCard);
@@ -941,7 +971,39 @@
             const top3 = sortedScores.slice(0, 3).map(s => dimensionNames[s[0]]);
 
             document.getElementById('resultName').textContent = `你最具有 ${top3.join('、')} 天赋`;
+// 添加免费版基础分析
+const freeAnalysis = document.createElement('div');
+freeAnalysis.style.cssText = 'background: #f8f9fa; padding: 25px; border-radius: 15px; margin: 25px 0;';
+freeAnalysis.innerHTML = `
+    <h3 style="color: #667eea; margin-bottom: 15px;">🎯 你的天赋特点（基础版）</h3>
+    <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 15px;">
+        <p style="font-size: 16px; line-height: 1.8; color: #333;">
+            <strong>核心优势：</strong>你在 <strong style="color: #667eea;">${top3[0]}</strong> 方面表现最为突出（${sortedScores[0][1]}分），
+            这意味着你在相关领域有天然的优势。其次是 <strong style="color: #667eea;">${top3[1]}</strong>（${sortedScores[1][1]}分）
+            和 <strong style="color: #667eea;">${top3[2]}</strong>（${sortedScores[2][1]}分）。
+        </p>
+    </div>
+    <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 15px;">
+        <p style="font-size: 15px; line-height: 1.8; color: #555;">
+            <strong>性格类型：</strong>${getPersonalityType(sortedScores[0][0])}的人
+        </p>
+    </div>
+    <div style="background: white; padding: 20px; border-radius: 10px;">
+        <p style="font-size: 15px; line-height: 1.8; color: #555;">
+            <strong>推荐方向：</strong>${getBasicCareerSuggestion(sortedScores[0][0])}
+        </p>
+    </div>
+    <div style="text-align: center; margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 10px;">
+        <p style="color: #856404; font-size: 14px;">
+            💡 想查看完整的50+职业推荐、详细能力分析和成长建议？<br>
+            请解锁下方的完整版报告！
+        </p>
+    </div>
+`;
 
+// 将免费分析插入到雷达图后面
+const chartContainer = document.querySelector('.chart-container');
+chartContainer.parentNode.insertBefore(freeAnalysis, chartContainer.nextSibling);
             drawRadarChart('radarChart', scores);
 
             const scoresGrid = document.getElementById('scoresGrid');
@@ -1035,13 +1097,34 @@
 
             drawRadarChart('radarChart2', scores);
 
-            document.getElementById('overallAnalysis').innerHTML = `
-                <p>根据你的测评结果,你在<strong>${top3.join('、')}</strong>方面表现突出。</p>
-                <div class="highlight-box">
-                    <strong>核心特质:</strong> 你的天赋组合表明你是一个${getPersonalityType(sortedScores[0][0])}的人,在相关领域有天然的优势。
-                </div>
-            `;
+           document.getElementById('overallAnalysis').innerHTML = `
+    <p style="font-size: 16px; line-height: 2;">根据你的测评结果，你在<strong style="color: #667eea;">${top3.join('、')}</strong>方面表现突出，形成了独特的天赋组合。</p>
+    
+    <div class="highlight-box" style="margin: 20px 0;">
+        <h4 style="color: #667eea; margin-bottom: 10px;">🌟 核心天赋特质</h4>
+        <p style="line-height: 1.8;">你是一个<strong>${getPersonalityType(sortedScores[0][0])}</strong>的人。你的<strong>${dimensionNames[sortedScores[0][0]]}</strong>天赋得分为<strong style="color: #d63031;">${sortedScores[0][1]}分</strong>，在人群中处于<strong>前${getPercentile(sortedScores[0][1])}%</strong>的水平。</p>
+    </div>
 
+    <div class="highlight-box" style="margin: 20px 0;">
+        <h4 style="color: #667eea; margin-bottom: 10px;">📊 天赋组合分析</h4>
+        <p style="line-height: 1.8;">
+            你的前三大天赋（${top3[0]}、${top3[1]}、${top3[2]}）组合在一起，形成了独特的优势模式。这种组合特别适合从事需要${getCombinationStrength(sortedScores.slice(0,3))}的工作。
+        </p>
+        <p style="line-height: 1.8; margin-top: 10px;">
+            <strong>具体表现：</strong><br>
+            • <strong>${dimensionNames[sortedScores[0][0]]}（${sortedScores[0][1]}分）</strong>：${getDimensionDetail(sortedScores[0][0])}<br>
+            • <strong>${dimensionNames[sortedScores[1][0]]}（${sortedScores[1][1]}分）</strong>：${getDimensionDetail(sortedScores[1][0])}<br>
+            • <strong>${dimensionNames[sortedScores[2][0]]}（${sortedScores[2][1]}分）</strong>：${getDimensionDetail(sortedScores[2][0])}
+        </p>
+    </div>
+
+    <div class="highlight-box" style="margin: 20px 0;">
+        <h4 style="color: #667eea; margin-bottom: 10px;">⚠️ 需要注意的弱项</h4>
+        <p style="line-height: 1.8;">
+            相对而言，你在<strong>${dimensionNames[sortedScores[9][0]]}（${sortedScores[9][1]}分）</strong>和<strong>${dimensionNames[sortedScores[8][0]]}（${sortedScores[8][1]}分）</strong>方面较弱。但这不代表你无法在这些领域发展，只是需要更多的刻意练习和努力。
+        </p>
+    </div>
+`;
             document.getElementById('careerAdvice').innerHTML = getCareerRecommendations(sortedScores);
             document.getElementById('strengthsAnalysis').innerHTML = getStrengthAnalysis(sortedScores);
             document.getElementById('growthPath').innerHTML = getGrowthPath(sortedScores);
@@ -1111,6 +1194,57 @@
                 </div>
             `;
         }
+        function getBasicCareerSuggestion(dimension) {
+    const suggestions = {
+        'A': '建筑设计、室内设计、城市规划等需要空间思维的职业',
+        'B': '写作、教育、翻译、新闻传媒等语言相关职业',
+        'C': '程序开发、数据分析、工程、咨询等逻辑分析类职业',
+        'D': '平面设计、插画、动画、美术创作等视觉艺术职业',
+        'E': '时尚设计、品牌策划、UI设计等审美相关职业',
+        'F': '音乐制作、演奏、作曲、音乐教育等音乐领域',
+        'G': '人力资源、心理咨询、销售、客户服务等人际互动职业',
+        'H': '产品设计、广告创意、创业、策划等创新领域',
+        'I': '运动教练、舞蹈、健身、手工艺等身体协调职业',
+        'J': '心理咨询、哲学研究、写作、个人成长导师等反思性职业'
+    };
+    return suggestions[dimension] || '多个领域都有发展机会';
+}
+function getPercentile(score) {
+    if (score >= 18) return '5';
+    if (score >= 16) return '15';
+    if (score >= 14) return '30';
+    if (score >= 12) return '50';
+    if (score >= 10) return '70';
+    return '85';
+}
+
+function getCombinationStrength(top3) {
+    const dims = top3.map(s => s[0]).join('');
+    
+    // 特殊组合识别
+    if (dims.includes('A') && dims.includes('D')) return '空间设计和视觉创作能力';
+    if (dims.includes('B') && dims.includes('G')) return '沟通表达和人际协调能力';
+    if (dims.includes('C') && dims.includes('H')) return '逻辑分析和创新思维能力';
+    if (dims.includes('F') && dims.includes('E')) return '艺术感知和审美创造能力';
+    
+    return '综合运用多种能力';
+}
+
+function getDimensionDetail(dim) {
+    const details = {
+        'A': '你能在脑海中轻松构建三维模型，对空间关系有敏锐的感知力，适合从事需要空间思维的工作',
+        'B': '你的语言表达能力出众，能够清晰流畅地传达想法，文字功底扎实',
+        'C': '你擅长逻辑推理和数学思维，能快速分析问题找到解决方案',
+        'D': '你对视觉艺术有天然的感知力，能够通过绘画等方式表达创意',
+        'E': '你对美有独特的理解和鉴赏力，色彩搭配和设计感很强',
+        'F': '你的音乐感知力强，对节奏旋律有天然的敏感度',
+        'G': '你善于理解他人情绪，人际交往能力强，团队协作表现优秀',
+        'H': '你思维活跃，经常有新点子，勇于尝试和创新',
+        'I': '你的身体协调性好，动手能力强，适合需要操作技能的工作',
+        'J': '你善于自我反思，对自己有清晰的认知，适合需要内省的工作'
+    };
+    return details[dim] || '这是你的优势领域';
+}
     </script>
 </body>
 </html>
