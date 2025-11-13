@@ -761,7 +761,7 @@ margin: 0 auto;
         let testResult = null;
 
         // 验证卡密
-       function verifyCard() {
+     function verifyCard() {
     const cardCode = document.getElementById('cardCode').value.trim().toUpperCase();
     const errorDiv = document.getElementById('errorMessage');
 
@@ -771,10 +771,10 @@ margin: 0 auto;
         return;
     }
 
-    // 从localStorage获取卡密列表，如果不存在则创建空数组
+    // 从localStorage获取卡密列表
     let cards = JSON.parse(localStorage.getItem('talentCards') || '[]');
     
-    // 如果找不到卡密，可能是在不同设备，先检查格式是否正确
+    // 检查格式
     const cardFormat = /^TF-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
     if (!cardFormat.test(cardCode)) {
         errorDiv.textContent = '卡密格式不正确';
@@ -782,37 +782,75 @@ margin: 0 auto;
         return;
     }
     
+    // 生成设备指纹（基于浏览器特征）
+    const deviceId = getDeviceFingerprint();
+    
     let card = cards.find(c => c.code === cardCode);
 
-    // 如果卡密不存在于localStorage中，说明是在不同设备
-    // 我们允许使用，但需要先添加到当前设备的localStorage
+    // 如果卡密不存在，添加到当前设备
     if (!card) {
-        // 添加这个卡密到当前设备
         card = {
             code: cardCode,
-            used: false,
+            deviceId: deviceId,
             createdAt: new Date().toISOString(),
-            device: 'cross-device'
+            firstUsedAt: new Date().toISOString()
         };
         cards.push(card);
         localStorage.setItem('talentCards', JSON.stringify(cards));
-    }
-
-    if (card.used) {
-        errorDiv.textContent = '该卡密已被使用';
-        errorDiv.style.display = 'block';
-        return;
-    }
-
-            // 验证成功,保存当前卡密
-            currentCard = cardCode;
-            sessionStorage.setItem('currentCard', cardCode);
-
-            // 开始测评
-            document.getElementById('verifyPage').style.display = 'none';
-            document.getElementById('testPage').style.display = 'block';
-            showQuestion();
+    } else {
+        // 卡密存在，检查设备绑定
+        if (card.deviceId && card.deviceId !== deviceId) {
+            errorDiv.textContent = '该卡密已在其他设备使用，无法在本设备使用';
+            errorDiv.style.display = 'block';
+            return;
         }
+        
+        // 如果卡密未绑定设备，现在绑定
+        if (!card.deviceId) {
+            card.deviceId = deviceId;
+            card.firstUsedAt = new Date().toISOString();
+            localStorage.setItem('talentCards', JSON.stringify(cards));
+        }
+    }
+
+    // 验证成功，保存当前卡密
+    currentCard = cardCode;
+    sessionStorage.setItem('currentCard', cardCode);
+
+    // 开始测评
+    document.getElementById('verifyPage').style.display = 'none';
+    document.getElementById('testPage').style.display = 'block';
+    showQuestion();
+}
+
+// 生成设备指纹函数
+function getDeviceFingerprint() {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.textBaseline = 'top';
+    ctx.font = '14px Arial';
+    ctx.fillText('fingerprint', 2, 2);
+    const canvasData = canvas.toDataURL();
+    
+    const fingerprint = [
+        navigator.userAgent,
+        navigator.language,
+        screen.width + 'x' + screen.height,
+        screen.colorDepth,
+        new Date().getTimezoneOffset(),
+        canvasData.slice(-50) // Canvas指纹
+    ].join('|');
+    
+    // 生成简单哈希
+    let hash = 0;
+    for (let i = 0; i < fingerprint.length; i++) {
+        const char = fingerprint.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+    }
+    
+    return 'device_' + Math.abs(hash).toString(36);
+}
 
         // 管理员面板
         function showAdminPanel() {
@@ -958,15 +996,6 @@ Object.keys(scores).forEach(dim => {
         scores[dim] = Math.round(scores[dim] / dimensionCounts[dim] * 4);
     }
 });
-            // 标记卡密已使用
-            const cards = JSON.parse(localStorage.getItem('talentCards') || '[]');
-            const cardIndex = cards.findIndex(c => c.code === currentCard);
-            if (cardIndex !== -1) {
-                cards[cardIndex].used = true;
-                cards[cardIndex].usedAt = new Date().toISOString();
-                localStorage.setItem('talentCards', JSON.stringify(cards));
-            }
-
             testResult = {
                 cardCode: currentCard,
                 scores: scores,
