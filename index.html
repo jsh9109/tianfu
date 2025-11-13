@@ -1097,7 +1097,7 @@ chartContainer.parentNode.insertBefore(freeAnalysis, chartContainer.nextSibling)
 
             drawRadarChart('radarChart2', scores);
 
-           document.getElementById('overallAnalysis').innerHTML = `
+          document.getElementById('overallAnalysis').innerHTML = `
     <p style="font-size: 16px; line-height: 2;">根据你的测评结果，你在<strong style="color: #667eea;">${top3.join('、')}</strong>方面表现突出，形成了独特的天赋组合。</p>
     
     <div class="highlight-box" style="margin: 20px 0;">
@@ -1106,22 +1106,36 @@ chartContainer.parentNode.insertBefore(freeAnalysis, chartContainer.nextSibling)
     </div>
 
     <div class="highlight-box" style="margin: 20px 0;">
-        <h4 style="color: #667eea; margin-bottom: 10px;">📊 天赋组合分析</h4>
+        <h4 style="color: #667eea; margin-bottom: 10px;">📊 10大维度完整解读</h4>
+        ${Object.keys(dimensionNames).map((dim, index) => {
+            const score = sortedScores.find(s => s[0] === dim)[1];
+            const rank = sortedScores.findIndex(s => s[0] === dim) + 1;
+            return `
+                <div style="background: ${rank <= 3 ? '#f0f9ff' : '#f9f9f9'}; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid ${rank <= 3 ? '#667eea' : '#ddd'};">
+                    <p style="margin: 0;"><strong>${index + 1}. ${dimensionNames[dim]}（${score}分 - 第${rank}名）</strong></p>
+                    <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">${getDetailedDimensionAnalysis(dim, score)}</p>
+                </div>
+            `;
+        }).join('')}
+    </div>
+
+    <div class="highlight-box" style="margin: 20px 0;">
+        <h4 style="color: #667eea; margin-bottom: 10px;">🎯 天赋组合优势</h4>
         <p style="line-height: 1.8;">
             你的前三大天赋（${top3[0]}、${top3[1]}、${top3[2]}）组合在一起，形成了独特的优势模式。这种组合特别适合从事需要${getCombinationStrength(sortedScores.slice(0,3))}的工作。
         </p>
         <p style="line-height: 1.8; margin-top: 10px;">
-            <strong>具体表现：</strong><br>
-            • <strong>${dimensionNames[sortedScores[0][0]]}（${sortedScores[0][1]}分）</strong>：${getDimensionDetail(sortedScores[0][0])}<br>
-            • <strong>${dimensionNames[sortedScores[1][0]]}（${sortedScores[1][1]}分）</strong>：${getDimensionDetail(sortedScores[1][0])}<br>
-            • <strong>${dimensionNames[sortedScores[2][0]]}（${sortedScores[2][1]}分）</strong>：${getDimensionDetail(sortedScores[2][0])}
+            <strong>组合特征：</strong><br>
+            ${getCombinationInsights(sortedScores.slice(0,3))}
         </p>
     </div>
 
     <div class="highlight-box" style="margin: 20px 0;">
-        <h4 style="color: #667eea; margin-bottom: 10px;">⚠️ 需要注意的弱项</h4>
+        <h4 style="color: #667eea; margin-bottom: 10px;">⚠️ 发展建议</h4>
         <p style="line-height: 1.8;">
-            相对而言，你在<strong>${dimensionNames[sortedScores[9][0]]}（${sortedScores[9][1]}分）</strong>和<strong>${dimensionNames[sortedScores[8][0]]}（${sortedScores[8][1]}分）</strong>方面较弱。但这不代表你无法在这些领域发展，只是需要更多的刻意练习和努力。
+            <strong>优势领域：</strong>继续深耕你的前3项天赋，这是你最容易出成果的方向。<br>
+            <strong>平衡发展：</strong>你在<strong>${dimensionNames[sortedScores[9][0]]}（${sortedScores[9][1]}分）</strong>和<strong>${dimensionNames[sortedScores[8][0]]}（${sortedScores[8][1]}分）</strong>方面相对较弱，如果工作需要这些能力，建议通过刻意练习提升。<br>
+            <strong>避开误区：</strong>不要强求在弱项上达到顶尖水平，而是学会用你的优势弥补弱项。
         </p>
     </div>
 `;
@@ -1148,52 +1162,157 @@ chartContainer.parentNode.insertBefore(freeAnalysis, chartContainer.nextSibling)
             return types[dimension];
         }
 
-        function getCareerRecommendations(sortedScores) {
-            const careers = {
-                'A': ['建筑师', '室内设计师', '城市规划师', '3D建模师', '游戏设计师'],
-                'B': ['作家', '编辑', '教师', '翻译', '新闻记者'],
-                'C': ['程序员', '数据分析师', '科学家', '工程师', '咨询顾问'],
-                'D': ['插画师', '平面设计师', '动画师', '美术老师', '艺术总监'],
-                'E': ['时尚设计师', 'UI设计师', '造型师', '品牌经理', '策展人'],
-                'F': ['音乐制作人', '作曲家', '音乐老师', '歌手', '乐器演奏家'],
-                'G': ['人力资源', '心理咨询师', '销售经理', '客户经理', '社工'],
-                'H': ['产品经理', '创业者', '广告创意', '发明家', '策划师'],
-                'I': ['运动员', '舞蹈演员', '健身教练', '外科医生', '工匠'],
-                'J': ['心理学家', '哲学家', '作家', '教练', '自我成长导师']
-            };
+      function getCareerRecommendations(sortedScores) {
+    return `
+    <p style="font-size: 15px; line-height: 1.8; margin-bottom: 20px;">基于你的天赋组合，为你精选了<strong>50+个</strong>最适合的职业方向，按匹配度和领域分类推荐：</p>
 
-            let html = '<p><strong>最适合你的职业方向:</strong></p><ul>';
-            sortedScores.slice(0, 3).forEach(([dim, score]) => {
-                html += `<li><strong>${dimensionNames[dim]}相关:</strong> ${careers[dim].join('、')}</li>`;
-            });
-            html += '</ul>';
-            return html;
-        }
+    <div class="highlight-box">
+        <h4 style="color: #00b894; margin-bottom: 10px;">⭐ 最强匹配职业（基于前3项天赋）</h4>
+        ${getTopCareerMatches(sortedScores.slice(0,3))}
+    </div>
 
-        function getStrengthAnalysis(sortedScores) {
-            let html = '<p><strong>你的核心优势:</strong></p>';
-            sortedScores.slice(0, 3).forEach(([dim, score]) => {
-                html += `<div class="highlight-box"><strong>${dimensionNames[dim]}(${score}分):</strong> 这是你的突出优势,建议在职业发展中充分发挥这方面的能力。</div>`;
-            });
-            return html;
-        }
+    <div class="highlight-box">
+        <h4 style="color: #667eea; margin-bottom: 10px;">🎨 创意与设计类（${sortedScores.filter(s => ['D','E','H'].includes(s[0])).length > 0 ? '匹配度高' : '匹配度中'}）</h4>
+        <p>平面设计师、UI/UX设计师、品牌设计师、插画师、动画师、视觉特效师、美术指导、创意总监、产品设计师、工业设计师</p>
+    </div>
+
+    <div class="highlight-box">
+        <h4 style="color: #667eea; margin-bottom: 10px;">💻 技术与分析类（${sortedScores.filter(s => ['C','A'].includes(s[0])).length > 0 ? '匹配度高' : '匹配度中'}）</h4>
+        <p>软件工程师、数据分析师、数据科学家、算法工程师、架构师、AI工程师、测试工程师、运维工程师、技术顾问、系统分析师</p>
+    </div>
+
+    <div class="highlight-box">
+        <h4 style="color: #667eea; margin-bottom: 10px;">✍️ 内容与传播类（${sortedScores.filter(s => ['B','G'].includes(s[0])).length > 0 ? '匹配度高' : '匹配度中'}）</h4>
+        <p>文案策划、内容运营、新媒体运营、记者、编辑、作家、博主、播客主持人、翻译、演讲培训师</p>
+    </div>
+
+    <div class="highlight-box">
+        <h4 style="color: #667eea; margin-bottom: 10px;">👥 人际与管理类（${sortedScores.filter(s => ['G','J'].includes(s[0])).length > 0 ? '匹配度高' : '匹配度中'}）</h4>
+        <p>人力资源、心理咨询师、职业规划师、培训师、团队管理、项目经理、客户经理、销售总监、运营总监、创业者</p>
+    </div>
+
+    <div class="highlight-box">
+        <h4 style="color: #667eea; margin-bottom: 10px;">🎵 艺术与表演类（${sortedScores.filter(s => ['F','I'].includes(s[0])).length > 0 ? '匹配度高' : '匹配度中'}）</h4>
+        <p>音乐制作人、作曲家、歌手、乐器演奏家、音乐老师、舞蹈演员、编舞、表演艺术家、运动员、健身教练</p>
+    </div>
+
+    <div class="highlight-box" style="background: #fff3cd; border-left-color: #ffc107;">
+        <h4 style="color: #856404; margin-bottom: 10px;">💡 职业转型建议</h4>
+        <p style="color: #856404;">
+            如果你目前的工作不匹配你的天赋，建议：<br>
+            1. <strong>短期（0-6个月）：</strong>在现有岗位中寻找能发挥你天赋的机会<br>
+            2. <strong>中期（6-18个月）：</strong>通过副业或项目积累新领域经验<br>
+            3. <strong>长期（18个月+）：</strong>正式转型到更匹配的职业赛道
+        </p>
+    </div>
+`;
+}
+
+       function getStrengthAnalysis(sortedScores) {
+    return `
+    <div class="highlight-box">
+        <h4 style="color: #00b894; margin-bottom: 10px;">✨ 你的TOP3核心优势</h4>
+        ${sortedScores.slice(0, 3).map((item, index) => `
+            <div style="margin: 15px 0;">
+                <p style="margin: 0;"><strong>第${index + 1}名：${dimensionNames[item[0]]}（${item[1]}分）</strong></p>
+                <p style="margin: 5px 0 0 20px; color: #666;">
+                    📌 <strong>优势表现：</strong>${getDimensionDetail(item[0])}<br>
+                    💼 <strong>适合场景：</strong>${getDimensionWorkContext(item[0])}<br>
+                    📚 <strong>提升建议：</strong>${getDimensionImprovement(item[0])}
+                </p>
+            </div>
+        `).join('')}
+    </div>
+
+    <div class="highlight-box">
+        <h4 style="color: #e17055; margin-bottom: 10px;">📈 待提升的3个维度</h4>
+        ${sortedScores.slice(7, 10).map((item, index) => `
+            <div style="margin: 15px 0;">
+                <p style="margin: 0;"><strong>${dimensionNames[item[0]]}（${item[1]}分）</strong></p>
+                <p style="margin: 5px 0 0 20px; color: #666;">
+                    ${getWeaknessImprovement(item[0])}
+                </p>
+            </div>
+        `).join('')}
+    </div>
+
+    <div class="highlight-box" style="background: #e8f5e9;">
+        <h4 style="color: #2e7d32; margin-bottom: 10px;">🎯 立即可实践的行动清单</h4>
+        <p><strong>本周就能开始的5件小事：</strong></p>
+        <ol style="margin: 10px 0; padding-left: 20px; line-height: 1.8;">
+            ${getActionableSteps(sortedScores[0][0])}
+        </ol>
+    </div>
+`;
+}
 
         function getGrowthPath(sortedScores) {
-            return `
-                <div class="highlight-box">
-                    <strong>短期目标(1-3个月):</strong>
-                    <p>深入学习${dimensionNames[sortedScores[0][0]]}相关技能,参加相关培训或课程。</p>
-                </div>
-                <div class="highlight-box">
-                    <strong>中期目标(3-12个月):</strong>
-                    <p>在工作中寻找能发挥${dimensionNames[sortedScores[0][0]]}和${dimensionNames[sortedScores[1][0]]}优势的机会。</p>
-                </div>
-                <div class="highlight-box">
-                    <strong>长期目标(1-3年):</strong>
-                    <p>成为${dimensionNames[sortedScores[0][0]]}领域的专家,用你的天赋创造价值。</p>
-                </div>
-            `;
-        }
+    return `
+    <div class="highlight-box">
+        <h4 style="color: #667eea; margin-bottom: 10px;">📅 30天快速提升计划</h4>
+        <p style="line-height: 1.8;">
+            <strong>第1-7天：</strong>每天花30分钟学习${dimensionNames[sortedScores[0][0]]}相关的基础知识<br>
+            <strong>第8-14天：</strong>找一个小项目实践，应用你的${dimensionNames[sortedScores[0][0]]}天赋<br>
+            <strong>第15-21天：</strong>寻找反馈，向该领域的专家请教<br>
+            <strong>第22-30天：</strong>总结经验，制定下一个30天计划
+        </p>
+    </div>
+
+    <div class="highlight-box">
+        <h4 style="color: #667eea; margin-bottom: 10px;">🎓 短期目标（1-3个月）</h4>
+        <p style="line-height: 1.8;">
+            <strong>学习目标：</strong>深入学习${dimensionNames[sortedScores[0][0]]}相关技能<br>
+            <strong>推荐课程：</strong>${getRecommendedCourses(sortedScores[0][0])}<br>
+            <strong>推荐书籍：</strong>${getRecommendedBooks(sortedScores[0][0])}<br>
+            <strong>实践项目：</strong>完成1-2个小项目，建立作品集
+        </p>
+    </div>
+
+    <div class="highlight-box">
+        <h4 style="color: #667eea; margin-bottom: 10px;">🚀 中期目标（3-12个月）</h4>
+        <p style="line-height: 1.8;">
+            <strong>能力目标：</strong>在工作中寻找能发挥${dimensionNames[sortedScores[0][0]]}和${dimensionNames[sortedScores[1][0]]}优势的机会<br>
+            <strong>网络拓展：</strong>加入3-5个相关的专业社群，结识同行<br>
+            <strong>副业尝试：</strong>用你的天赋做1-2个付费项目，验证市场需求<br>
+            <strong>导师寻找：</strong>找到1位该领域的导师或教练
+        </p>
+    </div>
+
+    <div class="highlight-box">
+        <h4 style="color: #667eea; margin-bottom: 10px;">🏆 长期目标（1-3年）</h4>
+        <p style="line-height: 1.8;">
+            <strong>职业目标：</strong>成为${dimensionNames[sortedScores[0][0]]}领域的专家，年收入提升30-50%<br>
+            <strong>影响力：</strong>在行业内建立个人品牌，发表见解或作品<br>
+            <strong>创造价值：</strong>用你的天赋帮助100+人解决问题<br>
+            <strong>持续学习：</strong>保持每周10小时的学习投入
+        </p>
+    </div>
+
+    <div class="highlight-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <h4 style="color: white; margin-bottom: 10px;">💎 专属资源推荐</h4>
+        <p style="line-height: 1.8;">
+            <strong>在线平台：</strong>${getOnlinePlatforms(sortedScores[0][0])}<br>
+            <strong>专业工具：</strong>${getProfessionalTools(sortedScores[0][0])}<br>
+            <strong>社群组织：</strong>${getCommunities(sortedScores[0][0])}<br>
+            <strong>关注大V：</strong>${getInfluencers(sortedScores[0][0])}
+        </p>
+    </div>
+
+    <div class="highlight-box" style="background: #fff3cd; border-left-color: #ffc107;">
+        <h4 style="color: #856404; margin-bottom: 10px;">⚡ 避坑指南</h4>
+        <p style="color: #856404; line-height: 1.8;">
+            ❌ <strong>不要做的3件事：</strong><br>
+            1. 不要盲目跟风学习与你天赋不匹配的热门技能<br>
+            2. 不要在弱项上花超过20%的时间<br>
+            3. 不要孤军奋战，一定要找到同行者和导师<br><br>
+            ✅ <strong>一定要做的3件事：</strong><br>
+            1. 每周至少花5小时深度实践你的核心天赋<br>
+            2. 每月与1位行业前辈深度交流<br>
+            3. 每季度复盘一次，调整方向
+        </p>
+    </div>
+`;
+}
         function getBasicCareerSuggestion(dimension) {
     const suggestions = {
         'A': '建筑设计、室内设计、城市规划等需要空间思维的职业',
@@ -1244,6 +1363,216 @@ function getDimensionDetail(dim) {
         'J': '你善于自我反思，对自己有清晰的认知，适合需要内省的工作'
     };
     return details[dim] || '这是你的优势领域';
+}
+        // 详细的维度分析
+function getDetailedDimensionAnalysis(dim, score) {
+    const analyses = {
+        'A': `你的空间思维能力${score >= 15 ? '非常出色' : score >= 12 ? '较强' : '有待提升'}，${score >= 15 ? '能够轻松处理复杂的三维建模和空间规划任务' : '建议多练习空间想象和方位识别'}。`,
+        'B': `你的语言表达能力${score >= 15 ? '出众' : score >= 12 ? '良好' : '需要加强'}，${score >= 15 ? '善于用文字或语言精准传达思想，适合从事写作、教学等工作' : '可以通过多阅读、多写作来提升'}。`,
+        'C': `你的逻辑分析能力${score >= 15 ? '突出' : score >= 12 ? '不错' : '可以提高'}，${score >= 15 ? '擅长发现规律、解决复杂问题，适合技术和咨询工作' : '建议多做逻辑训练和数学题'}。`,
+        'D': `你的绘画创作能力${score >= 15 ? '强' : score >= 12 ? '中等' : '一般'}，${score >= 15 ? '对线条、构图有天然的感知力，适合视觉设计工作' : '可以通过素描练习培养'}。`,
+        'E': `你的审美鉴赏力${score >= 15 ? '优秀' : score >= 12 ? '良好' : '需培养'}，${score >= 15 ? '对美有独特见解，色彩搭配和设计感强' : '多看优秀设计作品可以提升'}。`,
+        'F': `你的音乐感知力${score >= 15 ? '很强' : score >= 12 ? '还可以' : '较弱'}，${score >= 15 ? '对节奏旋律敏感，适合音乐创作和表演' : '可以通过学习乐器或声乐来培养'}。`,
+        'G': `你的人际交往能力${score >= 15 ? '出色' : score >= 12 ? '不错' : '需要提升'}，${score >= 15 ? '善于理解他人情绪，团队协作能力强' : '建议多参与社交活动锻炼'}。`,
+        'H': `你的创新思维能力${score >= 15 ? '突出' : score >= 12 ? '良好' : '有限'}，${score >= 15 ? '思维活跃，经常有新点子，适合创业和产品开发' : '可以通过头脑风暴和创意训练提升'}。`,
+        'I': `你的身体协调性${score >= 15 ? '很好' : score >= 12 ? '一般' : '较弱'}，${score >= 15 ? '动手能力强，适合需要操作技能的工作' : '可以通过运动和手工训练改善'}。`,
+        'J': `你的自我认知能力${score >= 15 ? '清晰' : score >= 12 ? '一般' : '模糊'}，${score >= 15 ? '善于反思，了解自己的优劣势' : '建议定期写日记进行自我梳理'}。`
+    };
+    return analyses[dim] || '';
+}
+
+// 获取天赋组合洞察
+function getCombinationInsights(top3) {
+    const dim1 = top3[0][0];
+    const dim2 = top3[1][0];
+    const dim3 = top3[2][0];
+    
+    return `
+        • 你的<strong>${dimensionNames[dim1]}</strong>能让你在该领域建立专业优势<br>
+        • 结合<strong>${dimensionNames[dim2]}</strong>，你可以把专业能力转化为实际成果<br>
+        • 再加上<strong>${dimensionNames[dim3]}</strong>，你将形成难以复制的竞争壁垒
+    `;
+}
+
+// 获取最佳职业匹配
+function getTopCareerMatches(top3) {
+    const combinations = {
+        'AB': '内容创作者、编剧、文案策划、新闻评论员',
+        'AC': '数据新闻、技术写作、产品文档工程师',
+        'AD': '创意总监、品牌设计师、视觉传达设计',
+        'BC': '技术培训师、知识博主、在线教育',
+        'CG': '产品经理、项目经理、技术团队Leader',
+        'CH': '技术创业者、创新顾问、算法研究员',
+        'DH': '游戏设计师、动画导演、创意工作室主理人',
+        'EH': '时尚设计师、艺术总监、品牌策划',
+        'FG': '音乐制作人、活动策划、文娱产业经理人',
+        'GH': '创业者、商业顾问、社会创新家'
+    };
+    
+    const key1 = top3[0][0] + top3[1][0];
+    const key2 = top3[1][0] + top3[0][0];
+    const match = combinations[key1] || combinations[key2] || '复合型人才、跨界专家';
+    
+    return `<p style="line-height: 1.8; font-size: 15px;"><strong>${match}</strong></p>
+            <p style="color: #666; margin-top: 10px;">这些职业能让你同时发挥${dimensionNames[top3[0][0]]}、${dimensionNames[top3[1][0]]}和${dimensionNames[top3[2][0]]}的优势，是你最容易出成果的方向。</p>`;
+}
+
+// 获取维度工作场景
+function getDimensionWorkContext(dim) {
+    const contexts = {
+        'A': '建筑设计、室内装修、地图导航、3D建模项目',
+        'B': '写作、演讲、教学、内容运营、文案策划',
+        'C': '数据分析、编程开发、战略规划、咨询项目',
+        'D': '平面设计、插画创作、品牌视觉、UI设计',
+        'E': '品牌策划、时尚搭配、产品设计、艺术策展',
+        'F': '音乐创作、声音设计、影视配乐、音频后期',
+        'G': '团队管理、客户沟通、人际协调、社群运营',
+        'H': '产品创新、广告创意、商业模式设计、创业项目',
+        'I': '运动训练、手工制作、实验操作、技术施工',
+        'J': '个人成长、心理咨询、哲学思考、自我管理'
+    };
+    return contexts[dim] || '';
+}
+
+// 获取维度提升建议
+function getDimensionImprovement(dim) {
+    const improvements = {
+        'A': '多玩空间类游戏（魔方、乐高），学习建筑软件（SketchUp、AutoCAD）',
+        'B': '每天写作500字，加入写作社群，学习演讲课程',
+        'C': '刷LeetCode算法题，学习Python/数据分析，读逻辑学书籍',
+        'D': '每天练习速写，学习PS/AI软件，临摹大师作品',
+        'E': '关注设计趋势，学习色彩理论，建立审美素材库',
+        'F': '学习一门乐器，练习视唱练耳，研究音乐理论',
+        'G': '参加社交活动，练习主动倾听，学习沟通技巧',
+        'H': '头脑风暴练习，关注创新案例，尝试跨界思考',
+        'I': '坚持运动训练，学习手工技能，提升身体觉知',
+        'J': '写反思日记，进行冥想练习，定期自我评估'
+    };
+    return improvements[dim] || '';
+}
+
+// 获取弱项提升建议
+function getWeaknessImprovement(dim) {
+    return `虽然这不是你的强项，但如果工作需要，建议：${getDimensionImprovement(dim)}。记住，不需要在每个维度都达到顶尖，重点是发挥优势。`;
+}
+
+// 获取可操作步骤
+function getActionableSteps(dim) {
+    const steps = {
+        'A': '<li>用乐高搭建一个小作品</li><li>下载SketchUp并完成一个简单的3D模型</li><li>闭眼在家中走一圈，训练空间记忆</li><li>玩一款空间解谜游戏30分钟</li><li>观察并画出你家的平面图</li>',
+        'B': '<li>每天写一篇300字的随笔</li><li>加入一个写作社群</li><li>录制一段3分钟的演讲视频</li><li>读一本写作技巧书籍</li><li>改写一篇广告文案</li>',
+        'C': '<li>在LeetCode上刷3道算法题</li><li>学习一个Python基础教程</li><li>分析一个生活中的逻辑问题</li><li>读一本逻辑思维的书</li><li>用Excel做一次数据分析</li>',
+        'D': '<li>每天画一个15分钟速写</li><li>临摹一幅喜欢的插画</li><li>学习PS的一个新功能</li><li>关注3个优秀设计师</li><li>重新设计你的社交媒体头像</li>',
+        'E': '<li>整理100张高质量设计图到素材库</li><li>学习一个配色理论</li><li>重新设计你的房间布局</li><li>关注3个时尚/设计博主</li><li>分析5个你喜欢的品牌视觉</li>',
+        'F': '<li>练习一首简单的歌曲</li><li>学习乐理知识30分钟</li><li>尝试用GarageBand创作一段旋律</li><li>分析一首喜欢的歌曲结构</li><li>参加一次线上音乐课</li>',
+        'G': '<li>主动约3个朋友深度聊天</li><li>参加一个线下社交活动</li><li>练习主动倾听技巧</li><li>给5个人发暖心的信息</li><li>学习一个沟通模型（如非暴力沟通）</li>',
+        'H': '<li>针对一个问题想10个解决方案</li><li>关注3个创新案例公众号</li><li>尝试组合两个不相关的事物</li><li>参加一次头脑风暴活动</li><li>为一个现有产品提出改进建议</li>',
+        'I': '<li>坚持运动30分钟×5天</li><li>学习一个手工技能（折纸/编织）</li><li>尝试一项新运动</li><li>做一次拉伸和平衡训练</li><li>用手机拍摄一段动作视频</li>',
+        'J': '<li>写一篇自我反思日记</li><li>做一次SWOT分析</li><li>冥想15分钟×3次</li><li>列出你的3个核心价值观</li><li>回顾本周的3个关键时刻</li>'
+    };
+    return steps[dim] || '<li>制定一个小目标并执行</li><li>每天进步1%</li>';
+}
+
+// 推荐课程
+function getRecommendedCourses(dim) {
+    const courses = {
+        'A': 'SketchUp建模课程、建筑设计基础、3D空间设计',
+        'B': '写作课（如得到大学）、演讲训练营、文案创作实战',
+        'C': 'Python数据分析、算法与数据结构、逻辑思维训练',
+        'D': 'Photoshop从入门到精通、插画创作课、UI设计实战',
+        'E': '色彩理论与应用、品牌视觉设计、时尚搭配课程',
+        'F': '乐理基础、编曲制作、声乐训练课程',
+        'G': '高效沟通技巧、领导力培养、心理学基础',
+        'H': '设计思维、创新方法论、产品经理课程',
+        'I': '健身教练课程、瑜伽培训、手工技艺课',
+        'J': '认知心理学、哲学导论、自我管理课程'
+    };
+    return courses[dim] || '相关领域的基础和进阶课程';
+}
+
+// 推荐书籍
+function getRecommendedBooks(dim) {
+    const books = {
+        'A': '《建筑的复杂性与矛盾性》《空间的诗学》',
+        'B': '《文心》《金字塔原理》《故事》',
+        'C': '《思考，快与慢》《数据之美》《算法导论》',
+        'D': '《设计的觉醒》《点石成金》《素描的诀窍》',
+        'E': '《设计中的设计》《色彩的性格》《审美力》',
+        'F': '《曲式与作品分析》《音乐理论基础》',
+        'G': '《非暴力沟通》《关键对话》《影响力》',
+        'H': '《创新者的窘境》《从0到1》《设计思维》',
+        'I': '《运动解剖学》《匠人精神》',
+        'J': '《内在动机》《被讨厌的勇气》《自控力》'
+    };
+    return books[dim] || '该领域的经典著作';
+}
+
+// 推荐在线平台
+function getOnlinePlatforms(dim) {
+    const platforms = {
+        'A': 'Behance、Pinterest、建筑学院',
+        'B': '简书、豆瓣、知乎专栏、得到',
+        'C': 'LeetCode、GitHub、Kaggle',
+        'D': 'Dribbble、站酷、UI中国',
+        'E': 'Behance、Dribble、Designspiration',
+        'F': 'SoundCloud、网易云音乐人、B站音乐区',
+        'G': 'LinkedIn、脉脉、行业社群',
+        'H': 'ProductHunt、36氪、创业邦',
+        'I': 'Keep、B站运动区、小红书',
+        'J': '豆瓣、知乎、个人博客'
+    };
+    return platforms[dim] || '相关专业平台';
+}
+
+// 推荐专业工具
+function getProfessionalTools(dim) {
+    const tools = {
+        'A': 'SketchUp、AutoCAD、Blender、Rhino',
+        'B': 'Notion、Typora、讯飞语记、幕布',
+        'C': 'Python、Jupyter、Tableau、Excel',
+        'D': 'Photoshop、Illustrator、Procreate、Figma',
+        'E': 'Pinterest、Eagle、Coolors、Adobe Color',
+        'F': 'Logic Pro、GarageBand、FL Studio、Cubase',
+        'G': 'Zoom、飞书、企业微信、DISC测评',
+        'H': 'Miro、Notion、MindNode、Sketch',
+        'I': 'Keep、Strava、运动相机、Apple Watch',
+        'J': 'Notion、Day One、正念冥想App'
+    };
+    return tools[dim] || '行业常用工具';
+}
+
+// 推荐社群组织
+function getCommunities(dim) {
+    const communities = {
+        'A': '建筑设计师协会、3D设计师社群',
+        'B': '写作者社群、演讲俱乐部、内容创作者联盟',
+        'C': '技术社区、算法爱好者群、数据科学社群',
+        'D': '设计师社群、插画师联盟、创意工作者组织',
+        'E': '美学生活社群、设计师俱乐部',
+        'F': '音乐制作人社群、独立音乐人联盟',
+        'G': 'HR社群、管理者俱乐部、领导力学习小组',
+        'H': '创业者社群、产品经理协会、创新实验室',
+        'I': '运动爱好者俱乐部、手工艺人社群',
+        'J': '心理成长小组、读书会、冥想社群'
+    };
+    return communities[dim] || '行业相关组织';
+}
+
+// 推荐关注的大V
+function getInfluencers(dim) {
+    const influencers = {
+        'A': '建筑师李虎、王澍、扎哈·哈迪德工作室',
+        'B': '刘润、李笑来、采铜、秋叶大叔',
+        'C': '左耳朵耗子、阮一峰、覃超',
+        'D': '张小翔、刘杨、优设创始人',
+        'E': '佐藤可士和、原研哉、山本耀司',
+        'F': '李健、周杰伦、坂本龙一',
+        'G': '樊登、吴晓波、罗振宇',
+        'H': '张小龙、雷军、马斯克',
+        'I': '刘畊宏、帕梅拉、李子柒',
+        'J': '武志红、李松蔚、KnowYourself'
+    };
+    return influencers[dim] || '行业领军人物';
 }
     </script>
 </body>
