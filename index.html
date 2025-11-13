@@ -276,7 +276,14 @@
             border-radius: 20px;
             padding: 40px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+margin: 0 auto;
         }
+        @media (max-width: 600px) {
+    .result-card {
+        padding: 25px 20px;
+    }
+}
 
         .result-header {
             text-align: center;
@@ -297,20 +304,20 @@
             opacity: 0.9;
         }
 
-        .chart-container {
+.chart-container {
     position: relative;
     height: 400px;
-    margin: 30px 0;
+    margin: 30px auto;
     padding: 20px;
     background: white;
     border-radius: 15px;
+    max-width: 600px;
 }
-
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .chart-container {
-        height: 350px;
-        padding: 10px;
-        margin: 20px 0;
+        height: 320px;
+        padding: 10px 5px;
+        margin: 20px auto;
     }
 }
 
@@ -1031,10 +1038,13 @@ chartContainer.parentNode.insertBefore(freeAnalysis, chartContainer.nextSibling)
             window.scrollTo(0, 0);
         }
 
-        function drawRadarChart(canvasId, scores) {
+       function drawRadarChart(canvasId, scores) {
     const ctx = document.getElementById(canvasId);
     const labels = Object.keys(dimensionNames).map(k => dimensionNames[k]);
     const data = Object.keys(dimensionNames).map(k => scores[k]);
+    
+    // 检测设备类型
+    const isMobile = window.innerWidth <= 768;
 
     new Chart(ctx, {
         type: 'radar',
@@ -1045,23 +1055,25 @@ chartContainer.parentNode.insertBefore(freeAnalysis, chartContainer.nextSibling)
                 data: data,
                 backgroundColor: 'rgba(102, 126, 234, 0.2)',
                 borderColor: 'rgba(102, 126, 234, 1)',
-                borderWidth: 3,
+                borderWidth: 2,
                 pointBackgroundColor: 'rgba(102, 126, 234, 1)',
                 pointBorderColor: '#fff',
                 pointBorderWidth: 2,
-                pointRadius: 5,
-                pointHoverRadius: 7,
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgba(102, 126, 234, 1)',
-                pointHoverBorderWidth: 3
+                pointRadius: isMobile ? 3 : 5,
+                pointHoverRadius: isMobile ? 5 : 7
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: true,
-            aspectRatio: 1.2,
+            aspectRatio: isMobile ? 1 : 1.1,
             layout: {
-                padding: {
+                padding: isMobile ? {
+                    top: 15,
+                    bottom: 15,
+                    left: 5,
+                    right: 5
+                } : {
                     top: 30,
                     bottom: 30,
                     left: 30,
@@ -1076,37 +1088,30 @@ chartContainer.parentNode.insertBefore(freeAnalysis, chartContainer.nextSibling)
                     ticks: {
                         stepSize: 5,
                         font: { 
-                            size: 11,
+                            size: isMobile ? 9 : 11,
                             weight: '500'
                         },
-                        color: '#666',
-                        backdropColor: 'rgba(255, 255, 255, 0.8)',
-                        backdropPadding: 3,
+                        color: '#999',
+                        backdropColor: 'rgba(255, 255, 255, 0.75)',
+                        backdropPadding: 2,
                         showLabelBackdrop: true
                     },
                     pointLabels: {
                         font: { 
-                            size: 13, 
+                            size: isMobile ? 11 : 13, 
                             weight: 'bold',
                             family: "'Microsoft YaHei', Arial, sans-serif"
                         },
                         color: '#333',
-                        padding: 15,
-                        callback: function(label) {
-                            // 如果标签太长，可以换行
-                            if (label.length > 5) {
-                                return label.split('-');
-                            }
-                            return label;
-                        }
+                        padding: isMobile ? 8 : 15
                     },
                     grid: {
                         color: 'rgba(102, 126, 234, 0.15)',
-                        lineWidth: 1.5
+                        lineWidth: 1
                     },
                     angleLines: {
                         color: 'rgba(102, 126, 234, 0.15)',
-                        lineWidth: 1.5
+                        lineWidth: 1
                     }
                 }
             },
@@ -1116,16 +1121,16 @@ chartContainer.parentNode.insertBefore(freeAnalysis, chartContainer.nextSibling)
                 },
                 tooltip: {
                     enabled: true,
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    backgroundColor: 'rgba(102, 126, 234, 0.9)',
                     titleFont: {
-                        size: 14,
+                        size: 13,
                         weight: 'bold'
                     },
                     bodyFont: {
-                        size: 13
+                        size: 12
                     },
-                    padding: 12,
-                    cornerRadius: 8,
+                    padding: 10,
+                    cornerRadius: 6,
                     callbacks: {
                         label: function(context) {
                             return '得分: ' + context.parsed.r + ' 分';
