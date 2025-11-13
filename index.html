@@ -783,8 +783,8 @@ function verifyCard() {
         return;
     }
     
-    // 生成设备指纹（基于浏览器特征）
-    const deviceId = getDeviceFingerprint();
+// 生成设备指纹（基于浏览器特征）
+const deviceId = 'temp_device_' + Date.now(); // 临时简化
     
     let card = cards.find(c => c.code === cardCode);
 
