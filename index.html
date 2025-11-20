@@ -978,7 +978,18 @@ function verifyCard() {
         errorDiv.style.display = 'block';
         return;
     }
+// [V3.3] 定义万能卡密
+    const MASTER_CODE = "GEMINI-MASTER";
 
+    // 检查是否为万能卡密，如果是，则跳过所有绑定和验证
+    if (cardCode === MASTER_CODE) {
+        currentCard = MASTER_CODE;
+        // 天赋测评使用 style.display 切换页面
+        document.getElementById('verifyPage').style.display = 'none'; 
+        document.getElementById('testPage').style.display = 'block';
+        showQuestion(); 
+        return; // 立即退出 verifyCard 函数
+    }
     // 从localStorage获取卡密列表 (使用 'talentCards' 这个key)
     let cards = JSON.parse(localStorage.getItem('talentCards') || '[]');
     
