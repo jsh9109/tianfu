@@ -968,33 +968,38 @@ margin: 0 auto;
         let testResult = null;
 
         // 验证卡密
-  /* --- [V3.1] 修复天赋测评的卡密绑定逻辑 --- */
+// [修正版] 验证卡密函数
 function verifyCard() {
     const cardCode = document.getElementById('cardCode').value.trim().toUpperCase();
     const errorDiv = document.getElementById('errorMessage');
-// [V3.3] 定义万能卡密
+    // [V3.3] 定义万能卡密
     const MASTER_CODE = "GEMINI-MASTER";
 
-    // 检查是否为万能卡密，如果是，则跳过所有绑定和验证
+    // --- 修复点：直接执行跳转，不调用不存在的函数 ---
     if (cardCode === MASTER_CODE) {
         currentCard = MASTER_CODE;
-        // 调用 showTestPage() 函数，进入答题页面
-        showTestPage(); 
-        return; // 立即退出 verifyCard 函数
+        // 1. 隐藏验证页，显示测试页
+        document.getElementById('verifyPage').style.display = 'none';
+        document.getElementById('testPage').style.display = 'block';
+        // 2. 加载第一题
+        showQuestion();
+        return; // 立即退出
     }
+    // -------------------------------------------
+
     if (!cardCode) {
         errorDiv.textContent = '请输入卡密';
         errorDiv.style.display = 'block';
         return;
     }
 
-    // 从localStorage获取卡密列表 (使用 'talentCards' 这个key)
+    // 从localStorage获取卡密列表
     let cards = JSON.parse(localStorage.getItem('talentCards') || '[]');
     
-    // 检查格式 (保持原来的格式)
+    // 检查格式
     const cardFormat = /^TF-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
     if (!cardFormat.test(cardCode)) {
-         // 也允许非TF格式的卡号 (这是我们后来加的)
+         // 也允许非TF格式的卡号
          if (!/^[A-Z0-9]{8,20}$/.test(cardCode)) {
             errorDiv.textContent = '卡密格式不正确';
             errorDiv.style.display = 'block';
@@ -1002,20 +1007,18 @@ function verifyCard() {
          }
     }
     
-    // [V3.1] 关键：调用您代码中已有的 getDeviceFingerprint() 函数
     const deviceId = getDeviceFingerprint(); 
     
     let card = cards.find(c => c.code === cardCode);
 
-    // --- [V3.1] 逻辑修正开始 ---
     if (!card) {
         // 如果卡号不存在，就创建它，并绑定到当前设备
         card = { 
             code: cardCode, 
-            deviceId: deviceId, // 立即绑定
+            deviceId: deviceId, 
             createdAt: new Date().toISOString(),
             firstUsedAt: new Date().toISOString(),
-            testCount: 0 // 初始测试次数
+            testCount: 0 
         };
         cards.push(card);
 
@@ -1033,13 +1036,11 @@ function verifyCard() {
             card.firstUsedAt = new Date().toISOString();
         }
     }
-    // --- [V3.1] 逻辑修正结束 ---
 
-    // 无论如何，都更新测试次数和最后使用时间
+    // 更新测试次数和最后使用时间
     card.testCount = (card.testCount || 0) + 1;
     card.lastUsedAt = new Date().toISOString();
     
-    // 关键修复：使用 'talentCards'
     localStorage.setItem('talentCards', JSON.stringify(cards));
     
     // 验证成功，保存当前卡密
@@ -1050,34 +1051,6 @@ function verifyCard() {
     document.getElementById('verifyPage').style.display = 'none';
     document.getElementById('testPage').style.display = 'block';
     showQuestion();
-}
-        // 生成设备指纹函数
-function getDeviceFingerprint() {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    ctx.textBaseline = 'top';
-    ctx.font = '14px Arial';
-    ctx.fillText('fingerprint', 2, 2);
-    const canvasData = canvas.toDataURL();
-    
-    const fingerprint = [
-        navigator.userAgent,
-        navigator.language,
-        screen.width + 'x' + screen.height,
-        screen.colorDepth,
-        new Date().getTimezoneOffset(),
-        canvasData.slice(-50) // Canvas指纹
-    ].join('|');
-    
-    // 生成简单哈希
-    let hash = 0;
-    for (let i = 0; i < fingerprint.length; i++) {
-        const char = fingerprint.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash;
-    }
-    
-    return 'device_' + Math.abs(hash).toString(36);
 }
 // 生成设备指纹函数
 function getDeviceFingerprint() {
