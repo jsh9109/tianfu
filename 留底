@@ -514,7 +514,164 @@ margin: 0 auto;
             .question-card {
                 padding: 25px;
             }
+            /* --- 粘贴到 <style> 标签底部 --- */
         }
+.payment-section {
+    width: 100%;
+    max-width: 450px;
+    margin: 20px auto 0 auto;
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+}
+
+.quick-pay-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.payment-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    color: white;
+    transition: transform 0.2s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+.payment-btn .icon {
+    margin-right: 8px;
+    font-size: 18px;
+}
+.payment-btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+.payment-btn.alipay {
+    background: #00A3EE; /* 支付宝蓝 */
+}
+.payment-btn.wechat {
+    background: #07C160; /* 微信绿 */
+}
+
+.divider-or {
+    text-align: center;
+    color: #aaa;
+    margin: 25px 0;
+    position: relative;
+}
+.divider-or span {
+    background: white;
+    padding: 0 10px;
+    position: relative;
+    z-index: 1;
+}
+.divider-or:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    height: 1px;
+    background: #e0e0e0;
+    z-index: 0;
+}
+
+.scan-title, .transfer-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.qr-code-grid {
+    display: flex;
+    flex-direction: column; /* 改为垂直布局 */
+    align-items: center; /* 让两个码在垂直方向上居中 */
+    gap: 25px; /* 稍微拉开一点垂直间距 */
+    text-align: center;
+}
+.qr-code-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.qr-code-item img {
+    width: 140px;
+    height: 140px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.btn-save {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 8px 16px;
+    background: #f0f0f0;
+    color: #555;
+    border-radius: 6px;
+    font-size: 13px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+.btn-save:hover {
+    background: #e0e0e0;
+}
+
+.scan-tip {
+    text-align: center;
+    font-size: 13px;
+    color: #888;
+    background: #fafafa;
+    padding: 10px;
+    border-radius: 6px;
+    margin-top: 20px;
+}
+
+.transfer-payment {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.copy-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+    padding: 12px 15px;
+    border-radius: 8px;
+}
+.copy-item span {
+    font-size: 15px;
+    color: #333;
+    font-weight: 500;
+    word-break: break-all;
+}
+.copy-item button {
+    padding: 8px 14px;
+    border: none;
+    background: #667eea;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    margin-left: 10px;
+    flex-shrink: 0;
+}
+.copy-item button:hover {
+    background: #5a6de0;
+}
+
+/* --- CSS 粘贴结束 --- */
     </style>
 </head>
 <body>
@@ -569,17 +726,16 @@ margin: 0 auto;
 
             <div class="features-box">
                 <h3>测评包含:</h3>
-                <ul>
-                    <li>10大天赋维度全面分析</li>
-                    <li>40道专业测试题目</li>
-                    <li>个性化能力雷达图</li>
-                    <li>50+职业方向推荐</li>
-                    <li>详细发展建议(付费解锁)</li>
-                </ul>
+               <ul>
+                    <li>10大天赋维度全面分析 </li>
+                    <li>40道专业测试题目 </li>
+                    <li>个性化能力雷达图 </li>
+                    <li><strong style="color:#d63031;">50+职业推荐+成长路径 (¥4.9解锁)</strong></li>
+                </ul>
             </div>
 
             <div class="card-input">
-                <input type="text" id="cardCode" placeholder="请输入测评卡密" maxlength="20">
+                <input type="text" id="cardCode" placeholder="请输入测评卡号" maxlength="20">
                 <div class="error-message" id="errorMessage">卡密错误或已使用</div>
             </div>
 
@@ -614,7 +770,10 @@ margin: 0 auto;
                 <div class="scores-grid" id="scoresGrid"></div>
 
                 <div class="unlock-section">
-                    <div class="unlock-title">🔓 解锁完整版深度报告</div>
+               <div class="unlock-title" style="font-size: 20px; line-height: 1.6; color: #2d3436;">
+    您的基础版结果已出 👇<br>
+    如需完整的 <strong style="color: #d63031;">50+职业推荐</strong> 和 <strong style="color: #d63031;">专属行动方案</strong>，可付费解锁：
+</div>
                     <div class="unlock-features">
                         <div class="unlock-feature">10个维度完整详细分析(每项500字深度解读)</div>
                         <div class="unlock-feature">专属职业发展建议(50+精准职业匹配)</div>
@@ -622,19 +781,56 @@ margin: 0 auto;
                         <div class="unlock-feature">个性化成长路径规划</div>
                         <div class="unlock-feature">各维度学习资源推荐</div>
                     </div>
-                    <div class="price">¥9.9</div>
+                    <div class="price">¥4.9</div>
                     <p style="color: #2d3436; font-size: 14px; margin-bottom: 20px;">
                         ⏰ 限时优惠价!原价29.9元
                     </p>
-<div style="text-align: center;">
-    <div style="display: inline-block; margin: 0 10px;">
-        <img src="wechat_qrcode.jpg" width="180" alt="微信收款码" style="border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-        <p style="margin-top: 10px; color: #666; font-size: 14px;">微信支付</p>
+<div class="payment-section">
+    <div class="quick-pay-buttons">
+<a href="https://qr.alipay.com/tsx15981nt9c4aydmvo2h3d" class="payment-btn alipay">
+            <span class="icon">⚡</span> 支付宝快捷支付
+        </a>
+        <a href="javascript:void(0);" onclick="showWechatScan()" class="payment-btn wechat">
+            <span class="icon">⚡</span> 微信快捷支付
+        </a>
     </div>
-    <div style="display: inline-block; margin: 0 10px;">
-        <img src="alipay_qrcode.png" width="180" alt="支付宝收款码" style="border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-        <p style="margin-top: 10px; color: #666; font-size: 14px;">支付宝</p>
+
+    <div class="divider-or"><span>或</span></div>
+
+    <div class="scan-payment">
+        <div class="scan-title">📱 扫码支付</div>
+        <div class="qr-code-grid">
+            <div class="qr-code-item">
+                <img src="wechat_qrcode.jpg" alt="微信收款码" id="wechatQR">
+                <a href="wechat_qrcode.jpg" download="wechat_pay_qr.jpg" class="btn-save">
+                    保存微信码
+                </a>
+            </div>
+            <div class="qr-code-item">
+                <img src="alipay_qrcode.png" alt="支付宝收款码" id="alipayQR">
+                <a href="alipay_qrcode.png" download="alipay_pay_qr.png" class="btn-save">
+                    保存支付宝码
+                </a>
+            </div>
+        </div>
+        <div class="scan-tip">
+            💡 保存后打开APP → 扫一扫 → 相册选择
+        </div>
     </div>
+
+    <div class="divider-or"><span>或</span></div>
+
+   <div class="transfer-payment">
+    <div class="transfer-title">💳 复制账号转账</div>
+    <div class="copy-item">
+        <span id="wechatID">jsh9109</span>
+        <button onclick="copyToClipboard('jsh9109', this)">复制微信</button>
+    </div>
+    <div class="copy-item">
+        <span id="alipayID">313360631@qq.com</span>
+        <button onclick="copyToClipboard('313360631@qq.com', this)">复制支付宝</button>
+    </div>
+</div>
 </div>
 
                     <div class="upload-section">
@@ -772,10 +968,24 @@ margin: 0 auto;
         let testResult = null;
 
         // 验证卡密
-    // 验证卡密
+// [修正版] 验证卡密函数
 function verifyCard() {
     const cardCode = document.getElementById('cardCode').value.trim().toUpperCase();
     const errorDiv = document.getElementById('errorMessage');
+    // [V3.3] 定义万能卡密
+    const MASTER_CODE = "GEMINI-MASTER";
+
+    // --- 修复点：直接执行跳转，不调用不存在的函数 ---
+    if (cardCode === MASTER_CODE) {
+        currentCard = MASTER_CODE;
+        // 1. 隐藏验证页，显示测试页
+        document.getElementById('verifyPage').style.display = 'none';
+        document.getElementById('testPage').style.display = 'block';
+        // 2. 加载第一题
+        showQuestion();
+        return; // 立即退出
+    }
+    // -------------------------------------------
 
     if (!cardCode) {
         errorDiv.textContent = '请输入卡密';
@@ -789,42 +999,50 @@ function verifyCard() {
     // 检查格式
     const cardFormat = /^TF-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
     if (!cardFormat.test(cardCode)) {
-        errorDiv.textContent = '卡密格式不正确';
-        errorDiv.style.display = 'block';
-        return;
+         // 也允许非TF格式的卡号
+         if (!/^[A-Z0-9]{8,20}$/.test(cardCode)) {
+            errorDiv.textContent = '卡密格式不正确';
+            errorDiv.style.display = 'block';
+            return;
+         }
     }
     
-// 生成设备指纹（基于浏览器特征）
-const deviceId = 'temp_device_' + Date.now(); // 临时简化
+    const deviceId = getDeviceFingerprint(); 
     
     let card = cards.find(c => c.code === cardCode);
 
-    // 如果卡密不存在，添加到当前设备
     if (!card) {
-        card = {
-            code: cardCode,
-            deviceId: deviceId,
+        // 如果卡号不存在，就创建它，并绑定到当前设备
+        card = { 
+            code: cardCode, 
+            deviceId: deviceId, 
             createdAt: new Date().toISOString(),
-            firstUsedAt: new Date().toISOString()
+            firstUsedAt: new Date().toISOString(),
+            testCount: 0 
         };
         cards.push(card);
-        localStorage.setItem('talentCards', JSON.stringify(cards));
+
     } else {
-        // 卡密存在，检查设备绑定
+        // 如果卡号存在，检查设备ID
         if (card.deviceId && card.deviceId !== deviceId) {
             errorDiv.textContent = '该卡密已在其他设备使用，无法在本设备使用';
             errorDiv.style.display = 'block';
             return;
         }
         
-        // 如果卡密未绑定设备，现在绑定
+        // (兼容旧卡) 如果找到卡，但它没有deviceId，就绑定它
         if (!card.deviceId) {
             card.deviceId = deviceId;
             card.firstUsedAt = new Date().toISOString();
-            localStorage.setItem('talentCards', JSON.stringify(cards));
         }
     }
 
+    // 更新测试次数和最后使用时间
+    card.testCount = (card.testCount || 0) + 1;
+    card.lastUsedAt = new Date().toISOString();
+    
+    localStorage.setItem('talentCards', JSON.stringify(cards));
+    
     // 验证成功，保存当前卡密
     currentCard = cardCode;
     sessionStorage.setItem('currentCard', cardCode);
@@ -833,34 +1051,6 @@ const deviceId = 'temp_device_' + Date.now(); // 临时简化
     document.getElementById('verifyPage').style.display = 'none';
     document.getElementById('testPage').style.display = 'block';
     showQuestion();
-}
-        // 生成设备指纹函数
-function getDeviceFingerprint() {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    ctx.textBaseline = 'top';
-    ctx.font = '14px Arial';
-    ctx.fillText('fingerprint', 2, 2);
-    const canvasData = canvas.toDataURL();
-    
-    const fingerprint = [
-        navigator.userAgent,
-        navigator.language,
-        screen.width + 'x' + screen.height,
-        screen.colorDepth,
-        new Date().getTimezoneOffset(),
-        canvasData.slice(-50) // Canvas指纹
-    ].join('|');
-    
-    // 生成简单哈希
-    let hash = 0;
-    for (let i = 0; i < fingerprint.length; i++) {
-        const char = fingerprint.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash;
-    }
-    
-    return 'device_' + Math.abs(hash).toString(36);
 }
 // 生成设备指纹函数
 function getDeviceFingerprint() {
@@ -902,8 +1092,8 @@ function getDeviceFingerprint() {
         }
 
         function showCardManagement() {
-            const count = prompt('生成多少个卡密?(1-100)');
-            if (!count || count < 1 || count > 100) return;
+            const count = prompt('生成多少个卡密?(1-1000)');
+            if (!count || count < 1 || count > 1000) return;
 
             const cards = JSON.parse(localStorage.getItem('talentCards') || '[]');
             const newCards = [];
@@ -987,14 +1177,25 @@ function getDeviceFingerprint() {
             }
         }
 
-        function selectOption(value) {
-            const question = questions[currentQuestion];
-            answers[question.id] = value;
+function selectOption(value) {
+            const question = questions[currentQuestion];
+            answers[question.id] = value; // value 是 0-4, 正确
 
-            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
-            event.target.classList.add('selected');
-            document.getElementById('nextBtn').disabled = false;
-        }
+            // 1. 立即高亮显示选中项
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            // 'event.target' 会自动获取用户点击的那个选项
+            event.target.classList.add('selected');
+            
+            // 2. 自动跳转 (添加一个短暂延迟，让用户能看到自己的选择)
+            setTimeout(() => {
+                if (currentQuestion < questions.length - 1) {
+                    nextQuestion();
+                } else {
+                    // 这是最后一道题，调用完成函数
+                    completeTest();
+                }
+            }, 200); // 延迟200毫秒 (0.2秒)，体验更真实
+        }
 
         function prevQuestion() {
             if (currentQuestion > 0) {
@@ -1057,7 +1258,7 @@ Object.keys(scores).forEach(dim => {
             const top3 = sortedScores.slice(0, 3).map(s => dimensionNames[s[0]]);
 
             document.getElementById('resultName').textContent = `你最具有 ${top3.join('、')} 天赋`;
-// 添加免费版基础分析
+// 添加基础版基础分析
 const freeAnalysis = document.createElement('div');
 freeAnalysis.style.cssText = 'background: #f8f9fa; padding: 25px; border-radius: 15px; margin: 25px 0;';
 freeAnalysis.innerHTML = `
@@ -1087,7 +1288,7 @@ freeAnalysis.innerHTML = `
     </div>
 `;
 
-// 将免费分析插入到雷达图后面
+// 将基础分析插入到雷达图后面
 const chartContainer = document.querySelector('.chart-container');
 chartContainer.parentNode.insertBefore(freeAnalysis, chartContainer.nextSibling);
             drawRadarChart('radarChart', scores);
@@ -1717,6 +1918,35 @@ function getInfluencers(dim) {
     };
     return influencers[dim] || '行业领军人物';
 }
+        // --- 粘贴到 <script> 标签底部 ---
+
+function showWechatScan() {
+    // 这个函数让页面滚动到微信二维码的位置
+    const qrElement = document.getElementById('wechatQR');
+    if (qrElement) {
+        qrElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // 简单提示
+        alert('微信支付请长按保存二维码，\n然后打开微信扫一扫 → 相册选择');
+    }
+}
+
+function copyToClipboard(text, buttonElement) {
+    navigator.clipboard.writeText(text).then(function() {
+        // 复制成功
+        const originalText = buttonElement.textContent;
+        buttonElement.textContent = '已复制!';
+        buttonElement.style.background = '#07C160'; // 变绿色
+        setTimeout(() => {
+            buttonElement.textContent = originalText;
+            buttonElement.style.background = '#667eea'; // 变回原色
+        }, 2000);
+    }, function(err) {
+        // 复制失败
+        alert('复制失败，请手动复制');
+    });
+}
+
+// --- JS 粘贴结束 ---
     </script>
 </body>
 </html>
