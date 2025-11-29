@@ -1350,39 +1350,45 @@ Object.keys(scores).forEach(dim => {
             const top3 = sortedScores.slice(0, 3).map(s => dimensionNames[s[0]]);
 
             document.getElementById('resultName').textContent = `你最具有 ${top3.join('、')} 天赋`;
-// 添加基础版基础分析
-const freeAnalysis = document.createElement('div');
-freeAnalysis.style.cssText = 'background: #f8f9fa; padding: 25px; border-radius: 15px; margin: 25px 0;';
-freeAnalysis.innerHTML = `
-    <h3 style="color: #667eea; margin-bottom: 15px;">🎯 你的天赋特点（基础版）</h3>
-    <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 15px;">
-        <p style="font-size: 16px; line-height: 1.8; color: #333;">
-            <strong>核心优势：</strong>你在 <strong style="color: #667eea;">${top3[0]}</strong> 方面表现最为突出（${sortedScores[0][1]}分），
-            这意味着你在相关领域有天然的优势。其次是 <strong style="color: #667eea;">${top3[1]}</strong>（${sortedScores[1][1]}分）
-            和 <strong style="color: #667eea;">${top3[2]}</strong>（${sortedScores[2][1]}分）。
-        </p>
-    </div>
-    <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 15px;">
-        <p style="font-size: 15px; line-height: 1.8; color: #555;">
-            <strong>性格类型：</strong>${getPersonalityType(sortedScores[0][0])}的人
-        </p>
-    </div>
-    <div style="background: white; padding: 20px; border-radius: 10px;">
-        <p style="font-size: 15px; line-height: 1.8; color: #555;">
-            <strong>推荐方向：</strong>${getBasicCareerSuggestion(sortedScores[0][0])}
-        </p>
-    </div>
-    <div style="text-align: center; margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 10px;">
-        <p style="color: #856404; font-size: 14px;">
-            💡 想查看完整的50+职业推荐、详细能力分析和成长建议？<br>
-            请解锁下方的完整版报告！
-        </p>
-    </div>
-`;
-
-// 将基础分析插入到雷达图后面
+// 添加基础版基础分析（检查是否已存在，避免重复）
 const chartContainer = document.querySelector('.chart-container');
-chartContainer.parentNode.insertBefore(freeAnalysis, chartContainer.nextSibling);
+const existingAnalysis = document.getElementById('freeAnalysisBlock');
+
+// 如果已经存在，就不要再添加了
+if (!existingAnalysis) {
+    const freeAnalysis = document.createElement('div');
+    freeAnalysis.id = 'freeAnalysisBlock'; // 添加ID用于检查
+    freeAnalysis.style.cssText = 'background: #f8f9fa; padding: 25px; border-radius: 15px; margin: 25px 0;';
+    freeAnalysis.innerHTML = `
+        <h3 style="color: #667eea; margin-bottom: 15px;">🎯 你的天赋特点（基础版）</h3>
+        <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 15px;">
+            <p style="font-size: 16px; line-height: 1.8; color: #333;">
+                <strong>核心优势：</strong>你在 <strong style="color: #667eea;">${top3[0]}</strong> 方面表现最为突出（${sortedScores[0][1]}分），
+                这意味着你在相关领域有天然的优势。其次是 <strong style="color: #667eea;">${top3[1]}</strong>（${sortedScores[1][1]}分）
+                和 <strong style="color: #667eea;">${top3[2]}</strong>（${sortedScores[2][1]}分）。
+            </p>
+        </div>
+        <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 15px;">
+            <p style="font-size: 15px; line-height: 1.8; color: #555;">
+                <strong>性格类型：</strong>${getPersonalityType(sortedScores[0][0])}的人
+            </p>
+        </div>
+        <div style="background: white; padding: 20px; border-radius: 10px;">
+            <p style="font-size: 15px; line-height: 1.8; color: #555;">
+                <strong>推荐方向：</strong>${getBasicCareerSuggestion(sortedScores[0][0])}
+            </p>
+        </div>
+        <div style="text-align: center; margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 10px;">
+            <p style="color: #856404; font-size: 14px;">
+                💡 想查看完整的50+职业推荐、详细能力分析和成长建议？<br>
+                请解锁下方的完整版报告！
+            </p>
+        </div>
+    `;
+
+    // 将基础分析插入到雷达图后面
+    chartContainer.parentNode.insertBefore(freeAnalysis, chartContainer.nextSibling);
+}
             drawRadarChart('radarChart', scores);
 
             const scoresGrid = document.getElementById('scoresGrid');
